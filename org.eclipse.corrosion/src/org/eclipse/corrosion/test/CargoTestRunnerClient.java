@@ -281,7 +281,7 @@ public class CargoTestRunnerClient implements ITestRunnerClient {
 		if (iStream == null) {
 			return;
 		}
-		session.notifyTestRunStarted(0);
+		session.notifyTestRunStarted(null);
 		fExecutedTests.clear();
 		try (InputStreamReader isReader = new InputStreamReader(iStream, StandardCharsets.UTF_8);
 				BufferedReader reader = new BufferedReader(isReader);
@@ -293,8 +293,8 @@ public class CargoTestRunnerClient implements ITestRunnerClient {
 			}
 		} catch (IOException e) {
 			CorrosionPlugin.logError(e);
-			session.notifyTestRunTerminated();
 		}
+		session.notifyTestRunTerminated();
 		fExecutedTests.clear();
 		shutDown();
 	}
