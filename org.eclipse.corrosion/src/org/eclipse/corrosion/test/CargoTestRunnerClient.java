@@ -214,8 +214,7 @@ public class CargoTestRunnerClient implements ITestRunnerClient {
 				TestElementReference testRef = fExecutedTests.get(fFailedTestCaseName);
 				FailureTrace failureTrace = fillFailureTrace(fFailedTestStdout.toString());
 
-				session.notifyTestFailed(session.getTestElement(testRef.id), testRef.failureKind,
-						failureTrace.isComparisonFailure(), failureTrace);
+				session.notifyTestFailed(session.getTestElement(testRef.id), testRef.failureKind, false, failureTrace);
 			}
 		}
 
@@ -449,6 +448,7 @@ public class CargoTestRunnerClient implements ITestRunnerClient {
 	}
 
 	public void receiveMessage(String message) {
+		System.out.println("MSG: " + message); //$NON-NLS-1$
 		fCurrentState = fCurrentState.readMessage(message);
 	}
 
