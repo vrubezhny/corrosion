@@ -318,6 +318,10 @@ public class CargoTestRunnerClient implements ITestRunnerClient {
 
 	public CargoTestRunnerClient(ITestRunSession session) {
 		this.session = session;
+	}
+
+	@Override
+	public void start() {
 		this.process = connectProcess(session.getLaunch());
 	}
 
@@ -424,7 +428,7 @@ public class CargoTestRunnerClient implements ITestRunnerClient {
 		if (iStream == null || eStream == null) {
 			return;
 		}
-		session.notifyTestRunStarted(null);
+		session.notifyTestSessionStarted(null);
 		fExecutedTests.clear();
 		try (InputStreamReader esReader = new InputStreamReader(eStream, StandardCharsets.UTF_8);
 				BufferedReader eReader = new BufferedReader(esReader);
@@ -456,13 +460,13 @@ public class CargoTestRunnerClient implements ITestRunnerClient {
 					receiveMessage(message, context);
 				}
 			}
+			session.notifyTestSessionCompleted(session.getDuration());
 		} catch (IOException e) {
 			CorrosionPlugin.logError(e);
+			session.notifyTestSessionAborted(null, e);
 		}
-		session.notifyTestRunTerminated();
 		fExecutedTests.clear();
 		fRootTestSuiteStack.clear();
-		shutDown();
 	}
 
 	private String fLastLineDelimiter = "\n"; //$NON-NLS-1$
@@ -520,36 +524,27 @@ public class CargoTestRunnerClient implements ITestRunnerClient {
 
 	@Override
 	public void stopTest() {
+		disconnect();
+	}
+
+	@Override
+	public void disconnect() {
 		try {
-			inputStream.close();
+			if (inputStream != null) {
+				inputStream.close();
+				inputStream = null;
+			}
 		} catch (IOException e) {
 			CorrosionPlugin.logError(e);
 		}
-	}
-
-	@Override
-	public boolean isRunning() {
 		try {
-			return inputStream.available() > 0;
-		} catch (IOException e) {
-			return false;
-		}
-	}
-
-	@Override
-	public void stopWaiting() {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void shutDown() {
-		try {
-			inputStream.close();
+			if (errorStream != null) {
+				errorStream.close();
+				errorStream = null;
+			}
 		} catch (IOException e) {
 			CorrosionPlugin.logError(e);
 		}
-
 	}
 
 	private ITestSuiteElement getTestSuite(String parentId) {
