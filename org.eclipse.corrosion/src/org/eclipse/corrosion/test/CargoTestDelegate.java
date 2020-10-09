@@ -38,11 +38,18 @@ import org.eclipse.debug.ui.ILaunchShortcut;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.unittest.launcher.UnitTestLaunchConfigurationConstants;
+import org.eclipse.unittest.ui.ITestViewSupport;
 
 public class CargoTestDelegate extends LaunchConfigurationDelegate implements ILaunchShortcut {
 	public static final String CARGO_TEST_LAUNCH_CONFIG_TYPE_ID = "org.eclipse.corrosion.test.CargoTestDelegate"; //$NON-NLS-1$
 	public static final String TEST_NAME_ATTRIBUTE = "TEST_NAME"; //$NON-NLS-1$
 	public static final String CARGO_UNITTEST_VIEW_SUPPORT_ID = "org.eclipse.corrosion.unitTestSupport"; //$NON-NLS-1$
+
+	@Override
+	public ILaunch getLaunch(ILaunchConfiguration configuration, String mode) throws CoreException {
+		ITestViewSupport.activateBundle();
+		return super.getLaunch(configuration, mode);
+	}
 
 	@Override
 	public void launch(ISelection selection, String mode) {
@@ -150,7 +157,7 @@ public class CargoTestDelegate extends LaunchConfigurationDelegate implements IL
 	 * @param config launch configuration
 	 * @throws CoreException in case of error
 	 */
-	private void updatedLaunchConfiguration(ILaunchConfiguration config) throws CoreException {
+	private static void updatedLaunchConfiguration(ILaunchConfiguration config) throws CoreException {
 		ILaunchConfigurationWorkingCopy configWC = config.getWorkingCopy();
 		configWC.setAttribute(UnitTestLaunchConfigurationConstants.ATTR_UNIT_TEST_VIEW_SUPPORT,
 				CARGO_UNITTEST_VIEW_SUPPORT_ID);
