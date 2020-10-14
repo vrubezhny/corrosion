@@ -64,7 +64,8 @@ public class CargoTestRunnerClient implements ITestRunnerClient {
 
 	// running 0 tests
 	private static final String TEST_SUITE_START_LINE_BEGIN = "running"; //$NON-NLS-1$
-	private static final String TEST_SUITE_START_LINE_END = "tests"; //$NON-NLS-1$
+	private static final String TEST_SUITE_START_LINE_END_MULTIPLE = "tests"; //$NON-NLS-1$
+	private static final String TEST_SUITE_START_LINE_END_SINGLE = "test"; //$NON-NLS-1$
 
 	// test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out
 	// test result: FAILED. 1 passed; 1 failed; 0 ignored; 0 measured; 0 filtered
@@ -104,7 +105,8 @@ public class CargoTestRunnerClient implements ITestRunnerClient {
 		@Override
 		ProcessingState readMessage(String message, RunContext<String> context) {
 			// running 0 tests
-			if (message.startsWith(TEST_SUITE_START_LINE_BEGIN) && message.endsWith(TEST_SUITE_START_LINE_END)) {
+			if (message.startsWith(TEST_SUITE_START_LINE_BEGIN) && (message.endsWith(TEST_SUITE_START_LINE_END_SINGLE)
+					|| message.endsWith(TEST_SUITE_START_LINE_END_MULTIPLE))) {
 				/* The following code is not used */
 //				int count = 0;
 //				try {
@@ -140,7 +142,8 @@ public class CargoTestRunnerClient implements ITestRunnerClient {
 				TestElementReference parentSuiteRef = fExecutedTests.get(testSuiteName);
 				if (parentSuiteRef == null) {
 					String testSuiteId = String.valueOf(++fTestId);
-					parentSuiteRef = new TestElementReference(rootSuite.getId(), testSuiteId, testSuiteName);
+					parentSuiteRef = new TestElementReference(rootSuite != null ? rootSuite.getId() : null, testSuiteId,
+							testSuiteName);
 					fExecutedTests.put(testSuiteName, parentSuiteRef);
 					session.newTestSuite(testSuiteId, testSuiteName, null, true, rootSuite, testSuiteName, null);
 				}
@@ -209,7 +212,6 @@ public class CargoTestRunnerClient implements ITestRunnerClient {
 			}
 		}
 
-		private static final String FAILURE_ERROR = "Error:"; //$NON-NLS-1$
 		private static final String FAILURE_THREAD = "thread"; //$NON-NLS-1$
 		private static final String FAILURE_PANICKED_AT_BEGIN = "panicked at"; //$NON-NLS-1$
 		private static final String FAILURE_PANICKED_AT_END = "',"; //$NON-NLS-1$
@@ -230,7 +232,7 @@ public class CargoTestRunnerClient implements ITestRunnerClient {
 				String source = trace.substring(panickedAtEmd + FAILURE_PANICKED_AT_END.length()).strip();
 				StringBuilder failureTrace = new StringBuilder();
 				failureTrace.append(panickedAtText);
-				failureTrace.append('\n').append(TestViewSupport.FRAME_PREFIX).append(source); // $NON-NLS-1$
+				failureTrace.append('\n').append(CargoTestViewSupport.FRAME_PREFIX).append(source); // $NON-NLS-1$
 
 				// Some private cases
 
@@ -505,7 +507,6 @@ public class CargoTestRunnerClient implements ITestRunnerClient {
 	}
 
 	public void receiveHeaders(String message, RunContext<String> context) {
-		System.out.println("HDR: " + message); //$NON-NLS-1$
 		if (message != null) {
 			message = message.trim();
 			// Running target/debug/deps/testfoo-6f7cfd8c97086512
@@ -518,7 +519,6 @@ public class CargoTestRunnerClient implements ITestRunnerClient {
 	}
 
 	public void receiveMessage(String message, RunContext<String> context) {
-		System.out.println("MSG: " + message); //$NON-NLS-1$
 		fCurrentState = fCurrentState.readMessage(message, context);
 	}
 
