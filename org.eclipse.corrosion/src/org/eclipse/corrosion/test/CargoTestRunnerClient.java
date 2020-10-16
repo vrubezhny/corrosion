@@ -134,20 +134,11 @@ public class CargoTestRunnerClient implements ITestRunnerClient {
 				String testName = message
 						.substring(TEST_PERFORMED_LINE_BEGIN.length(), message.indexOf(TEST_PERFORMED_LINE_END)).trim();
 				String testDisplayName = testName
-						.substring(testName.indexOf(TEST_NAME_SEPARATOR) + TEST_NAME_SEPARATOR.length()).trim();
-				String testSuiteName = testName.substring(0, testName.indexOf(TEST_NAME_SEPARATOR)).trim();
-
+						.substring(testName.lastIndexOf(TEST_NAME_SEPARATOR) + TEST_NAME_SEPARATOR.length()).trim();
+				String testSuiteName = testName.substring(0, testName.lastIndexOf(TEST_NAME_SEPARATOR)).trim();
 				ITestSuiteElement rootSuite = fRootTestSuiteStack.isEmpty() ? null : fRootTestSuiteStack.peek();
 
-				TestElementReference parentSuiteRef = fExecutedTests.get(testSuiteName);
-				if (parentSuiteRef == null) {
-					String testSuiteId = String.valueOf(++fTestId);
-					parentSuiteRef = new TestElementReference(rootSuite != null ? rootSuite.getId() : null, testSuiteId,
-							testSuiteName);
-					fExecutedTests.put(testSuiteName, parentSuiteRef);
-					session.newTestSuite(testSuiteId, testSuiteName, null, true, rootSuite, testSuiteName, null);
-				}
-
+				TestElementReference parentSuiteRef = getOrCreateParentTestSuite(testSuiteName, rootSuite);
 				ITestSuiteElement parentSuite = (ITestSuiteElement) session.getTestElement(parentSuiteRef.id);
 
 				String testId = String.valueOf(++fTestId);
@@ -188,6 +179,34 @@ public class CargoTestRunnerClient implements ITestRunnerClient {
 			}
 
 			return this;
+		}
+
+		private TestElementReference getOrCreateParentTestSuite(String testSuiteName, ITestSuiteElement rootSuite) {
+			String[] displayNames = testSuiteName.split(TEST_NAME_SEPARATOR);
+			String parentSuiteName = null;
+
+			for (String displayName : displayNames) {
+				String name = parentSuiteName != null ? parentSuiteName + TEST_NAME_SEPARATOR + displayName
+						: displayName;
+				TestElementReference suiteRef = fExecutedTests.get(name);
+				if (suiteRef == null) {
+					String testSuiteId = String.valueOf(++fTestId);
+
+					TestElementReference parentSuiteRef = parentSuiteName != null ? fExecutedTests.get(parentSuiteName)
+							: null;
+					ITestSuiteElement parentSuite = parentSuiteRef != null
+							? (ITestSuiteElement) session.getTestElement(parentSuiteRef.id)
+							: rootSuite;
+					;
+					String parentSuiteId = parentSuite != null ? parentSuite.getId() : null;
+
+					suiteRef = new TestElementReference(parentSuiteId, testSuiteId, name);
+					fExecutedTests.put(name, suiteRef);
+					session.newTestSuite(testSuiteId, name, null, true, parentSuite, displayName, null);
+				}
+				parentSuiteName = name;
+			}
+			return fExecutedTests.get(parentSuiteName);
 		}
 	}
 

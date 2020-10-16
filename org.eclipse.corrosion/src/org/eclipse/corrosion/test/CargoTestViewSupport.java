@@ -19,6 +19,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.text.StringMatcher;
 import org.eclipse.corrosion.CorrosionPlugin;
 import org.eclipse.corrosion.test.actions.OpenEditorAtLineAction;
+import org.eclipse.corrosion.test.actions.OpenTestAction;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.jface.action.IAction;
@@ -42,12 +43,12 @@ public class CargoTestViewSupport implements ITestViewSupport {
 
 	@Override
 	public IAction getOpenTestAction(IViewPart testRunnerPart, ITestCaseElement testCase) {
-		return null;
+		return new OpenTestAction(testRunnerPart, testCase);
 	}
 
 	@Override
 	public IAction getOpenTestAction(IViewPart testRunnerPart, ITestSuiteElement testSuite) {
-		return null;
+		return new OpenTestAction(testRunnerPart, testSuite);
 	}
 
 	@Override
