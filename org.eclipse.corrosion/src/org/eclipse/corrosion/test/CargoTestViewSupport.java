@@ -27,7 +27,6 @@ import org.eclipse.ui.IViewPart;
 import org.eclipse.unittest.launcher.ITestRunnerClient;
 import org.eclipse.unittest.model.ITestCaseElement;
 import org.eclipse.unittest.model.ITestElement;
-import org.eclipse.unittest.model.ITestRoot;
 import org.eclipse.unittest.model.ITestRunSession;
 import org.eclipse.unittest.model.ITestSuiteElement;
 import org.eclipse.unittest.ui.ITestViewSupport;
@@ -130,8 +129,8 @@ public class CargoTestViewSupport implements ITestViewSupport {
 		if (testElement instanceof ITestCaseElement) {
 			return testElement.getTestName();
 		} else if (testElement instanceof ITestSuiteElement) {
-			if (!(testElement.getParent() instanceof ITestRoot)
-					&& !(testElement.getParent().getParent() instanceof ITestRoot)) {
+			if (!(testElement.getParent() instanceof ITestRunSession)
+					&& !(testElement.getParent().getParent() instanceof ITestRunSession)) {
 				return testElement.getTestName();
 			}
 		}

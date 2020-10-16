@@ -122,7 +122,7 @@ public class CargoTestRunnerClient implements ITestRunnerClient {
 				String testSuiteName = TEST_SUITE_NAME_PREFIX + context.next();
 				String testSuiteDisplayName = TEST_ELEMENT_DISPLAY_NAME_PREFIX + testSuiteName;
 
-				session.newTestSuite(testSuiteId, testSuiteName, null, true, null, testSuiteDisplayName, null);
+				session.newTestSuite(testSuiteId, testSuiteName, null, null, testSuiteDisplayName, null);
 
 				fRootTestSuiteStack.push(getTestSuite(testSuiteId));
 				return this;
@@ -145,7 +145,7 @@ public class CargoTestRunnerClient implements ITestRunnerClient {
 
 				TestElementReference testRef = new TestElementReference(parentSuite.getId(), testId, testName);
 				fExecutedTests.put(testName, testRef);
-				session.newTestCase(testId, testName, true, parentSuite, testDisplayName, null);
+				session.newTestCase(testId, testName, parentSuite, testDisplayName, null);
 
 				ITestElement testElement = session.getTestElement(testId);
 				session.notifyTestStarted(testElement);
@@ -202,7 +202,7 @@ public class CargoTestRunnerClient implements ITestRunnerClient {
 
 					suiteRef = new TestElementReference(parentSuiteId, testSuiteId, name);
 					fExecutedTests.put(name, suiteRef);
-					session.newTestSuite(testSuiteId, name, null, true, parentSuite, displayName, null);
+					session.newTestSuite(testSuiteId, name, null, parentSuite, displayName, null);
 				}
 				parentSuiteName = name;
 			}
