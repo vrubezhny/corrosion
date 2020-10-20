@@ -135,11 +135,17 @@ public class CargoTestRunnerClient implements ITestRunnerClient {
 						.substring(TEST_PERFORMED_LINE_BEGIN.length(), message.indexOf(TEST_PERFORMED_LINE_END)).trim();
 				String testDisplayName = testName
 						.substring(testName.lastIndexOf(TEST_NAME_SEPARATOR) + TEST_NAME_SEPARATOR.length()).trim();
-				String testSuiteName = testName.substring(0, testName.lastIndexOf(TEST_NAME_SEPARATOR)).trim();
+				String testSuiteName = testName.contains(TEST_NAME_SEPARATOR)
+						? testName.substring(0, testName.lastIndexOf(TEST_NAME_SEPARATOR)).trim()
+						: null;
 				ITestSuiteElement rootSuite = fRootTestSuiteStack.isEmpty() ? null : fRootTestSuiteStack.peek();
 
-				TestElementReference parentSuiteRef = getOrCreateParentTestSuite(testSuiteName, rootSuite);
-				ITestSuiteElement parentSuite = (ITestSuiteElement) session.getTestElement(parentSuiteRef.id);
+				TestElementReference parentSuiteRef = testSuiteName != null
+						? getOrCreateParentTestSuite(testSuiteName, rootSuite)
+						: null;
+				ITestSuiteElement parentSuite = testSuiteName != null
+						? (ITestSuiteElement) session.getTestElement(parentSuiteRef.id)
+						: rootSuite;
 
 				String testId = String.valueOf(++fTestId);
 
