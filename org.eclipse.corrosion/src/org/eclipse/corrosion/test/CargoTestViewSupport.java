@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.text.StringMatcher;
 import org.eclipse.corrosion.CorrosionPlugin;
+import org.eclipse.corrosion.launch.RustLaunchDelegateTools;
 import org.eclipse.corrosion.test.actions.OpenEditorAtLineAction;
 import org.eclipse.corrosion.test.actions.OpenTestAction;
 import org.eclipse.debug.core.ILaunchConfiguration;
@@ -86,6 +87,8 @@ public class CargoTestViewSupport implements ITestViewSupport {
 		return Collections.emptySet();
 	}
 
+	private static final String EXACT_FLAG = "--exact"; //$NON-NLS-1$
+
 	@Override
 	public ILaunchConfiguration getRerunLaunchConfiguration(List<ITestElement> testElements) {
 		if (testElements.isEmpty()) {
@@ -110,7 +113,9 @@ public class CargoTestViewSupport implements ITestViewSupport {
 				}
 				sb.append(v.trim());
 			}
+
 			res.setAttribute(CargoTestDelegate.TEST_NAME_ATTRIBUTE, sb.toString());
+			res.setAttribute(RustLaunchDelegateTools.ARGUMENTS_ATTRIBUTE, sb.length() > 0 ? EXACT_FLAG : ""); //$NON-NLS-1$
 			return res;
 		} catch (CoreException e) {
 			CorrosionPlugin.logError(e);
@@ -129,7 +134,7 @@ public class CargoTestViewSupport implements ITestViewSupport {
 		if (testElement instanceof ITestCaseElement) {
 			return testElement.getTestName();
 		} else if (testElement instanceof ITestSuiteElement) {
-			if (!(testElement.getParent() instanceof ITestRunSession)
+			if (testElement.getParent() != null && !(testElement.getParent() instanceof ITestRunSession)
 					&& !(testElement.getParent().getParent() instanceof ITestRunSession)) {
 				return testElement.getTestName();
 			}

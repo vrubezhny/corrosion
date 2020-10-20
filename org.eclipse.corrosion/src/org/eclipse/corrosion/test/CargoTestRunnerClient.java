@@ -133,8 +133,10 @@ public class CargoTestRunnerClient implements ITestRunnerClient {
 			if (message.startsWith(TEST_PERFORMED_LINE_BEGIN) && message.contains(TEST_PERFORMED_LINE_END)) {
 				String testName = message
 						.substring(TEST_PERFORMED_LINE_BEGIN.length(), message.indexOf(TEST_PERFORMED_LINE_END)).trim();
-				String testDisplayName = testName
-						.substring(testName.lastIndexOf(TEST_NAME_SEPARATOR) + TEST_NAME_SEPARATOR.length()).trim();
+				String testDisplayName = testName.contains(TEST_NAME_SEPARATOR)
+						? testName.substring(testName.lastIndexOf(TEST_NAME_SEPARATOR) + TEST_NAME_SEPARATOR.length())
+								.trim()
+						: testName;
 				String testSuiteName = testName.contains(TEST_NAME_SEPARATOR)
 						? testName.substring(0, testName.lastIndexOf(TEST_NAME_SEPARATOR)).trim()
 						: null;
@@ -361,7 +363,7 @@ public class CargoTestRunnerClient implements ITestRunnerClient {
 			errorStream = toInputStream(process, true);
 			inputStream = toInputStream(process, false);
 			Job.createSystem("Monitor test process", (ICoreRunnable) monitor -> run(errorStream, inputStream)) //$NON-NLS-1$
-					.schedule(150);
+					.schedule(100);
 			// TODO schedule(100) is a workaround because we need to wait for listeners to
 			// be plugged in, but
 			// it's actually a design issue: listeners should be part of the session and
