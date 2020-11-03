@@ -205,7 +205,6 @@ public class CargoTestRunnerClient implements ITestRunnerClient {
 					ITestSuiteElement parentSuite = parentSuiteRef != null
 							? (ITestSuiteElement) session.getTestElement(parentSuiteRef.id)
 							: rootSuite;
-					;
 					String parentSuiteId = parentSuite != null ? parentSuite.getId() : null;
 
 					suiteRef = new TestElementReference(parentSuiteId, testSuiteId, name);
@@ -350,7 +349,7 @@ public class CargoTestRunnerClient implements ITestRunnerClient {
 	}
 
 	@Override
-	public void start() {
+	public void startMonitoring() {
 		this.process = connectProcess(session.getLaunch());
 	}
 
@@ -551,11 +550,11 @@ public class CargoTestRunnerClient implements ITestRunnerClient {
 
 	@Override
 	public void stopTest() {
-		disconnect();
+		stopMonitoring();
 	}
 
 	@Override
-	public void disconnect() {
+	public void stopMonitoring() {
 		try {
 			if (inputStream != null) {
 				inputStream.close();

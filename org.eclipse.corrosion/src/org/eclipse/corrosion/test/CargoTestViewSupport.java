@@ -24,7 +24,7 @@ import org.eclipse.corrosion.test.actions.OpenTestAction;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.jface.action.IAction;
-import org.eclipse.ui.IViewPart;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.unittest.launcher.ITestRunnerClient;
 import org.eclipse.unittest.model.ITestCaseElement;
 import org.eclipse.unittest.model.ITestElement;
@@ -42,17 +42,17 @@ public class CargoTestViewSupport implements ITestViewSupport {
 	}
 
 	@Override
-	public IAction getOpenTestAction(IViewPart testRunnerPart, ITestCaseElement testCase) {
-		return new OpenTestAction(testRunnerPart, testCase);
+	public IAction getOpenTestAction(Shell shell, ITestCaseElement testCase) {
+		return new OpenTestAction(shell, testCase);
 	}
 
 	@Override
-	public IAction getOpenTestAction(IViewPart testRunnerPart, ITestSuiteElement testSuite) {
-		return new OpenTestAction(testRunnerPart, testSuite);
+	public IAction getOpenTestAction(Shell shell, ITestSuiteElement testSuite) {
+		return new OpenTestAction(shell, testSuite);
 	}
 
 	@Override
-	public IAction createOpenEditorAction(IViewPart testRunnerPart, ITestElement failure, String traceLine) {
+	public IAction createOpenEditorAction(Shell shell, ITestElement failure, String traceLine) {
 		try {
 			int indexOfFramePrefix = traceLine.indexOf(FRAME_PREFIX);
 			if (indexOfFramePrefix == -1) {
@@ -65,7 +65,7 @@ public class CargoTestViewSupport implements ITestViewSupport {
 
 			String lineNumber = traceLine.substring(lineNumberIndex + 1, columNumberIndex).trim();
 			int line = Integer.parseInt(lineNumber);
-			return new OpenEditorAtLineAction(testRunnerPart, testName, failure.getTestRunSession(), line);
+			return new OpenEditorAtLineAction(shell, testName, failure.getTestRunSession(), line);
 		} catch (NumberFormatException | IndexOutOfBoundsException e) {
 			CorrosionPlugin.logError(e);
 		}
@@ -88,6 +88,7 @@ public class CargoTestViewSupport implements ITestViewSupport {
 	}
 
 	private static final String EXACT_FLAG = "--exact"; //$NON-NLS-1$
+	private static final String TEST_FLAG = "--test"; //$NON-NLS-1$
 
 	@Override
 	public ILaunchConfiguration getRerunLaunchConfiguration(List<ITestElement> testElements) {
@@ -102,20 +103,29 @@ public class CargoTestViewSupport implements ITestViewSupport {
 			ArrayList<String> list = (ArrayList<String>) testElements.stream().map(CargoTestViewSupport::packTestPaths)
 					.collect(Collectors.toList());
 
-			// Join path parts into the only string
-			StringBuilder sb = new StringBuilder();
-			boolean needDelimiter = false;
-			for (String v : list) {
-				if (needDelimiter) {
-					sb.append(' ');
-				} else {
-					needDelimiter = true;
+			String testName = ""; //$NON-NLS-1$
+			StringBuilder attributes = new StringBuilder();
+
+			// in case of Zero-elements length both testName and attributes are to be empty
+			if (list.size() == 1) {
+				testName = list.get(0);
+				attributes.append(EXACT_FLAG);
+				System.out
+						.println("ReRun ONE test: name: [" + testName + "], options: [" + attributes.toString() + "]"); //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
+			} else if (list.size() > 1) {
+				attributes.append(TEST_FLAG);
+				for (String v : list) {
+					attributes.append(' ').append(v.trim());
 				}
-				sb.append(v.trim());
+				System.out.println("ReRun MULTIPLE (" + list.size() + ") tests: name: [" + testName + "], options: [" //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
+						+ attributes.toString() + "]"); //$NON-NLS-1$
+			} else {
+				System.out
+						.println("ReRun ALL tests: name: [" + testName + "], options: [" + attributes.toString() + "]"); //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
 			}
 
-			res.setAttribute(CargoTestDelegate.TEST_NAME_ATTRIBUTE, sb.toString());
-			res.setAttribute(RustLaunchDelegateTools.ARGUMENTS_ATTRIBUTE, sb.length() > 0 ? EXACT_FLAG : ""); //$NON-NLS-1$
+			res.setAttribute(CargoTestDelegate.TEST_NAME_ATTRIBUTE, testName);
+			res.setAttribute(RustLaunchDelegateTools.ARGUMENTS_ATTRIBUTE, attributes.toString());
 			return res;
 		} catch (CoreException e) {
 			CorrosionPlugin.logError(e);

@@ -37,8 +37,7 @@ import org.eclipse.debug.core.model.LaunchConfigurationDelegate;
 import org.eclipse.debug.ui.ILaunchShortcut;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.ui.IEditorPart;
-import org.eclipse.unittest.launcher.UnitTestLaunchConfigurationConstants;
-import org.eclipse.unittest.ui.ITestViewSupport;
+import org.eclipse.unittest.ui.ConfigureViewerSupport;
 
 public class CargoTestDelegate extends LaunchConfigurationDelegate implements ILaunchShortcut {
 	public static final String CARGO_TEST_LAUNCH_CONFIG_TYPE_ID = "org.eclipse.corrosion.test.CargoTestDelegate"; //$NON-NLS-1$
@@ -47,7 +46,8 @@ public class CargoTestDelegate extends LaunchConfigurationDelegate implements IL
 
 	@Override
 	public ILaunch getLaunch(ILaunchConfiguration configuration, String mode) throws CoreException {
-		ITestViewSupport.activateBundle();
+		CorrosionPlugin.activateUnitTestCoreBundle();
+		updatedLaunchConfiguration(configuration);
 		return super.getLaunch(configuration, mode);
 	}
 
@@ -159,8 +159,7 @@ public class CargoTestDelegate extends LaunchConfigurationDelegate implements IL
 	 */
 	private static void updatedLaunchConfiguration(ILaunchConfiguration config) throws CoreException {
 		ILaunchConfigurationWorkingCopy configWC = config.getWorkingCopy();
-		configWC.setAttribute(UnitTestLaunchConfigurationConstants.ATTR_UNIT_TEST_VIEW_SUPPORT,
-				CARGO_UNITTEST_VIEW_SUPPORT_ID);
+		new ConfigureViewerSupport(CARGO_UNITTEST_VIEW_SUPPORT_ID).apply(configWC);
 		configWC.doSave();
 	}
 
@@ -170,8 +169,7 @@ public class CargoTestDelegate extends LaunchConfigurationDelegate implements IL
 		if (launchConfiguration instanceof ILaunchConfigurationWorkingCopy) {
 			ILaunchConfigurationWorkingCopy wc = (ILaunchConfigurationWorkingCopy) launchConfiguration;
 			wc.setAttribute(RustLaunchDelegateTools.PROJECT_ATTRIBUTE, resource.getProject().getName());
-			wc.setAttribute(UnitTestLaunchConfigurationConstants.ATTR_UNIT_TEST_VIEW_SUPPORT,
-					CARGO_UNITTEST_VIEW_SUPPORT_ID);
+			new ConfigureViewerSupport(CARGO_UNITTEST_VIEW_SUPPORT_ID).apply(wc);
 		}
 		return launchConfiguration;
 	}

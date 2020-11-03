@@ -458,7 +458,7 @@
       </handler>
    </extension>
    <extension
-         point="org.eclipse.unittest.unittestViewSupport">
+         point="org.eclipse.unittest.ui.unittestViewSupport">
       <viewSupport
             class="org.eclipse.corrosion.test.CargoTestViewSupport"
             id="org.eclipse.corrosion.unitTestSupport">

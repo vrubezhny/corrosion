@@ -22,11 +22,13 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.ICoreRunnable;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.corrosion.cargo.core.CargoTools;
@@ -189,6 +191,12 @@ public class CorrosionPlugin extends AbstractUIPlugin {
 			// Error will be caught with empty response
 		}
 		return ""; //$NON-NLS-1$
+	}
+
+	// activating UnitTestPlugin bundle
+
+	public static void activateUnitTestCoreBundle() {
+		Assert.isNotNull(Platform.getBundle("org.eclipse.unittest.ui")); //$NON-NLS-1$
 	}
 
 	// Cargo Source Lookup
